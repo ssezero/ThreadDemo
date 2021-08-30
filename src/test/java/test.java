@@ -25,36 +25,35 @@ public class test {
         showListNode(head);
 
         test t1 = new test();
-        ListNode nodes=t1.removeNthFromEnd(head, 5);
+        ListNode nodes = t1.reverseList(head);
         showListNode(nodes);
     }
 
-    public ListNode removeNthFromEnd(ListNode head, int n) {
+    public ListNode reverseList(ListNode head) {
 
+        if (head == null) return null;
+        if (head.next == null) return head;
 
-        ListNode removeNode=head;
-        int length=0;
-        while (removeNode!=null)
-        {
-            length++;
-            removeNode=removeNode.next;
-        }
-        int removeIndex=length-(n-1);
-        System.out.println(String.format("要删除的是第%S个",removeIndex));
-        if(removeIndex==1) return head.next;
-        removeNode=head;
+        ListNode prev = head;
+        ListNode next = head.next;
+        while (true) {
 
-        int k=0;
-        while (removeNode!=null){
-            k++;
-            //确定是要删除的node
-            if(k==(removeIndex-1)){
-                removeNode.next=removeNode.next.next;
+            //1 找出当前的头和下一个
+            //2. 交换头和下一个的执行
+            ListNode old_next = next.next;
+            head.next = old_next;
+            next.next = prev;
+            prev = next;
+            next = head.next;
+
+            if(head.next==null){
                 break;
             }
-            removeNode=removeNode.next;
         }
-        return head;
+
+
+        return prev;
+
     }
 
     public static void showListNode(ListNode nodes) {

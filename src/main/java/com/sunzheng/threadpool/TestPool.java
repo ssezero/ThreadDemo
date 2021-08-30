@@ -2,6 +2,7 @@ package com.sunzheng.threadpool;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -17,6 +18,34 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 public class TestPool { }
 
+//创建线程池
+class ThreadPool{
+    //任务队列
+    private BlockQueue<Runnable> taskQueue;
+
+    //线程的集合
+    HashSet<Worker> workers=new HashSet<>();
+
+    //任务获取超时时间
+    private long timeOut;
+
+    //核心线程数量
+    private int coreSize;
+
+    //时间单位
+    private TimeUnit timeUnit;
+
+    public ThreadPool(int queueCapcity, long timeOut, int coreSize, TimeUnit timeUnit) {
+        this.taskQueue = new BlockQueue<>(queueCapcity);
+        this.timeOut = timeOut;
+        this.coreSize = coreSize;
+        this.timeUnit = timeUnit;
+    }
+
+    class Worker{
+
+    }
+}
 
 //线城池阻塞队列
 class BlockQueue<T>{

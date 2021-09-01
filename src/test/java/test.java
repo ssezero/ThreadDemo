@@ -13,22 +13,63 @@ import java.util.List;
  **/
 public class test {
     static ListNode head = new ListNode(1);
+    static ListNode head2 = new ListNode(1);
 
     public static void main(String[] args) {
 
 
         head.next = new ListNode(2);
-        head.next.next = new ListNode(3);
-        head.next.next.next = new ListNode(4);
-        head.next.next.next.next = new ListNode(5);
+        head.next.next = new ListNode(4);
+
+        head2.next = new ListNode(3);
+        head2.next.next = new ListNode(4);
+
 
         showListNode(head);
+        showListNode(head2);
 
         test t1 = new test();
-        ListNode nodes = t1.reverseList(head);
-        showListNode(nodes);
+        ListNode listNode = t1.mergeTwoLists(head, head2);
+        showListNode(listNode);
+
+
     }
 
+    /*
+     * @Author Neal
+     * @Description //
+     * 将两个升序链表合并为一个新的 升序 链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的
+     * @Date 9:33 2021/9/1
+     * @Param
+     * @return
+     **/
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode nodes=new ListNode(0);
+        ListNode head=nodes;
+        while (l1!=null||l2!=null)
+        {
+            if(l1==null) {
+                nodes.next=l2;
+                break;
+            }
+            if(l2==null){
+                nodes.next=l1;
+                break;
+            }
+            if(l1.val<=l2.val){
+                nodes.next=l1;
+                l1=l1.next;
+                nodes=nodes.next;
+            }else
+            {
+                nodes.next=l2;
+                l2=l2.next;
+                nodes=nodes.next;
+            }
+        }
+
+        return head.next;
+    }
     public ListNode reverseList(ListNode head) {
 
         if (head == null) return null;
@@ -46,7 +87,7 @@ public class test {
             prev = next;
             next = head.next;
 
-            if(head.next==null){
+            if (head.next == null) {
                 break;
             }
         }
@@ -56,16 +97,19 @@ public class test {
 
     }
 
+
+
     public static void showListNode(ListNode nodes) {
+
+        if (nodes==null) return;
         ListNode nodefalg = nodes;
         while (true) {
-            System.out.println(nodefalg.val);
+            System.out.print(nodefalg.val+"-->");
             if (nodefalg.next == null) break;
             nodefalg = nodefalg.next;
         }
+        System.out.println();
     }
-
-
 }
 
 class ListNode {

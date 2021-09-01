@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,16 +19,36 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j(topic = "c.TestPost")
 public class TestPool {
     public static void main(String[] args) {
-        ThreadPool threadPool = new ThreadPool(10, 2, 2, TimeUnit.MILLISECONDS);
-        for (int i = 0; i < 5; i++) {
+        ThreadPool threadPool = new ThreadPool(1, 2, 1, TimeUnit.MILLISECONDS,((queue, task) -> {
+//            queue.addTask(task);
+            queue.offer(task,500,TimeUnit.MILLISECONDS);
+        }));
+        for (int i = 0; i < 15; i++) {
             int j = i;
             threadPool.execute(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 log.debug("{}", j);
             });
         }
     }
 }
 
+
+/*
+ * @Author Neal
+ * @Description //
+ * 接口用于
+ * @Date 13:45 2021/9/1
+ * @Param
+ * @return
+ **/
+interface TacticsRule<T>{
+    void tasic(BlockQueue<T> queue,T task);
+}
 @Slf4j(topic = "c.")
 //创建线程池
 class ThreadPool {
@@ -47,12 +66,15 @@ class ThreadPool {
 
     //时间单位
     private TimeUnit timeUnit;
+    //cel
+    private  TacticsRule<Runnable> tacticsRule;
 
-    public ThreadPool(int queueCapcity, long timeOut, int coreSize, TimeUnit timeUnit) {
+    public ThreadPool(int queueCapcity, long timeOut, int coreSize, TimeUnit timeUnit,TacticsRule<Runnable> tacticsRule) {
         this.taskQueue = new BlockQueue<>(queueCapcity);
         this.timeOut = timeOut;
         this.coreSize = coreSize;
         this.timeUnit = timeUnit;
+        this.tacticsRule=tacticsRule;
     }
 
     //执行任务
@@ -71,8 +93,9 @@ class ThreadPool {
                 worker.start();
             } else {
                 //2. 如果线程池里面的任务已经大于核心线程数，则进入队列
-                log.debug("任务进入到等待队列:{}", task);
-                taskQueue.addTask(task);
+//                taskQueue.addTask(task);
+                //采用策略
+                taskQueue.celui(tacticsRule,task);
             }
         }
     }
@@ -110,6 +133,7 @@ class ThreadPool {
     }
 }
 
+@Slf4j(topic = "Queue.")
 //线城池阻塞队列
 class BlockQueue<T> {
     private int capacity;
@@ -131,7 +155,6 @@ class BlockQueue<T> {
         try {
             while (queue.isEmpty()) {
                 try {
-//                    emptyCondition.await();
                     nanos = emptyCondition.awaitNanos(nanos);
                     if(nanos<=0) return null;
                 } catch (InterruptedException e) {
@@ -165,30 +188,74 @@ class BlockQueue<T> {
         }
     }
 
+
     //添加任务
     public void addTask(T task) {
         lock.lock();
         try {
             while (queue.size() == capacity) {
                 try {
+                    log.debug("等待加入任务队列{}....",task);
                     fullCondition.await();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            queue.addFirst(task);
+            queue.addLast(task);
+            log.debug("任务进入到等待队列:{}", task);
             emptyCondition.signal();
         } finally {
             lock.unlock();
         }
     }
 
+    //带超时的添加
+    public boolean offer(T task,long timeOut,TimeUnit timeUnit){
+        lock.lock();
+        try {
+            long nanos = timeUnit.toNanos(timeOut);
+            while (queue.size() == capacity) {
+                try {
+                    log.debug("等待加入任务队列{}....",task);
+                    if(nanos<=0){
+                        return false;
+                    }
+                    nanos = fullCondition.awaitNanos(nanos);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            queue.addLast(task);
+            log.debug("任务进入到等待队列:{}", task);
+            emptyCondition.signal();
+            return  true;
+        } finally {
+            lock.unlock();
+        }
+    }
     //返回一队列的大小
     public int getSize() {
         lock.lock();
         try {
             return queue.size();
         } finally {
+            lock.unlock();
+        }
+    }
+
+    public void celui(TacticsRule<T> tacticsRule, T task) {
+        lock.lock();
+        try{
+            if(queue.size()==capacity){
+                tacticsRule.tasic(this,task);
+            }
+            else
+            {
+                queue.addLast(task);
+                log.debug("任务进入到等待队列:{}", task);
+                emptyCondition.signal();
+            }
+        }finally {
             lock.unlock();
         }
     }

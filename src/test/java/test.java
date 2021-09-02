@@ -1,6 +1,8 @@
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.ls.LSException;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,30 +13,51 @@ import java.util.List;
  * @Date 2021/8/12 9:41
  * @Version 1.0
  **/
+@Slf4j(topic = "Lecod.")
 public class test {
     static ListNode head = new ListNode(1);
-    static ListNode head2 = new ListNode(1);
-
     public static void main(String[] args) {
 
 
         head.next = new ListNode(2);
-        head.next.next = new ListNode(4);
-
-        head2.next = new ListNode(3);
-        head2.next.next = new ListNode(4);
-
+        head.next.next = new ListNode(3);
+        head.next.next.next = new ListNode(1);
 
         showListNode(head);
-        showListNode(head2);
-
         test t1 = new test();
-        ListNode listNode = t1.mergeTwoLists(head, head2);
-        showListNode(listNode);
-
+        boolean palindrome = t1.isPalindrome(head);
+       log.debug("是真的吗？{}",palindrome);
 
     }
 
+/*
+ * @Author Neal
+ * @Description //
+ * 回文链表
+ * @Date 9:42 2021/9/2
+ * @Param [head]
+ * @return boolean
+ **/
+    public boolean isPalindrome(ListNode head) {
+        List<Integer> list=new ArrayList<>();
+        while (head!=null){
+            list.add(head.val);
+            head=head.next;
+        }
+        int index=0;
+        int lastindex=list.size()-1;
+        while (true){
+            if(index==lastindex|| lastindex<index){
+                return true;
+            }
+            if(list.get(index)!=list.get(lastindex)){
+                return false;
+            }
+            index++;
+            lastindex--;
+        }
+
+    }
     /*
      * @Author Neal
      * @Description //
@@ -67,7 +90,6 @@ public class test {
                 nodes=nodes.next;
             }
         }
-
         return head.next;
     }
     public ListNode reverseList(ListNode head) {

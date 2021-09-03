@@ -17,18 +17,41 @@ import java.util.List;
 public class test {
     static ListNode head = new ListNode(1);
     public static void main(String[] args) {
-
-
         head.next = new ListNode(2);
         head.next.next = new ListNode(3);
-        head.next.next.next = new ListNode(1);
+        head.next.next.next = new ListNode(4);
+        head.next.next.next.next=head.next;
 
-        showListNode(head);
+//      showListNode(head);
         test t1 = new test();
-        boolean palindrome = t1.isPalindrome(head);
-       log.debug("是真的吗？{}",palindrome);
+        boolean b = t1.hasCycle(head);
+        log.debug(b+"");
 
     }
+
+    /*
+     * @Author Neal
+     * @Description //
+     * 判断是否有闭环
+     * @Date 9:35 2021/9/3
+     * @Param
+     * @return
+     **/
+    public boolean hasCycle(ListNode head) {
+        ListNode slow=head;
+        ListNode fast=head;
+        while (head!=null)
+        {
+            slow=slow.next;
+            fast=fast.next.next;
+            if(slow==fast) return  true;
+            head=head.next;
+            if(head==null) return false;
+        }
+        return false;
+    }
+
+
 
 /*
  * @Author Neal

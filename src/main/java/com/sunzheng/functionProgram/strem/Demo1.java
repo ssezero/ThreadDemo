@@ -24,9 +24,9 @@ public class Demo1 {
         list.add("张三风");
         commMethod(list);
         log.debug("---------------------------");
-
-
         streamDemo1(list);
+
+
     }
 
     private static void streamDemo1(List<String> list) {
